@@ -1,0 +1,10 @@
+DirectoryIndex index.php
+RewriteEngine On
+RewriteCond $1 !^(index\.php|images|css|js|robots\.txt|favicon\.ico)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ ./index.php/$1 [L,QSA]  
+php_value max_input_vars 3000
+php_value suhosin.get.max_vars 3000
+php_value suhosin.post.max_vars 3000
+php_value suhosin.request.max_vars 3000
