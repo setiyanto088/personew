@@ -39,7 +39,7 @@
 	$int_prog = 0;
 	$percentage = 0;
 		
-	$periode_list_script = "SELECT PERIODE FROM M_MONTH_PROFILE_RES_P22 WHERE PROFILE_ID = ".$id." AND STATUS_PROCESS = 0 and PERIODE LIKE '%2023%' ORDER BY PERIODE DESC ";   
+	$periode_list_script = "SELECT PERIODE FROM M_MONTH_PROFILE_RES_P22 WHERE PROFILE_ID = ".$id." AND STATUS_PROCESS = 0 and PERIODE LIKE '%2024%' ORDER BY PERIODE DESC ";   
 						
 	$query_periode_list =  mysqli_query($con_maria,$periode_list_script);  
 	while($row_PER = mysqli_fetch_array($query_periode_list)){

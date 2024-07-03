@@ -57,9 +57,12 @@
 	
 	$row_users['PROFILE_ID'] = $id;
 	
+	$int_pr = 1;
 	//-------------------------------------------------------------------------------------------------
 		
 	foreach($arr_periode as $arp){
+		
+		$date_start_pp = date('Y-m-d H:i:s');
 		
 		$sql_edit = " update M_MONTH_PROFILE_RES_P22 set DATE_PROCESS = '".date('Y-m-d H:i:s')."', STATUS_PROCESS = '3' WHERE PERIODE = '".$arp."' AND PROFILE_ID = ".$id;
 		$query_edt =  mysqli_query($con_maria,$sql_edit);  
@@ -901,7 +904,9 @@ AND ID_PROFILE = ".$id."
 		
 		$sql_edit = " update M_MONTH_PROFILE_RES_P22 set DATE_FINISH = '".date('Y-m-d H:i:s')."', STATUS_PROCESS = '1' WHERE PERIODE = '".$arp."' AND PROFILE_ID = ".$id;
 		$query_edt =  mysqli_query($con_maria,$sql_edit);  
-	
+		
+		$date_end_pp = date('Y-m-d H:i:s');
+		
 		$percentage = $percentage + (8/$int_prog);
 		$script_doneb_s = "UPDATE t_profiling_ub_res SET global_progress = '".$percentage." %' where id ='".$id."' ";
 		mysqli_query($con_maria,$script_doneb_s);  
@@ -910,6 +915,15 @@ AND ID_PROFILE = ".$id."
 		// $response = file_get_contents('http://dev-db.u.1elf.net/ff/sync_data_res_periode.php?p='.$arp.'&id='.$id);
 		// $response = file_get_contents('http://dev-db.u.1elf.net/ff/sync_param_res.php');
 		// $response = file_get_contents('http://dev-db.u.1elf.net/ff/sync_data.php?p='.$arp.'&id='.$id);
+		
+		if($int_pr == 1){
+			
+			$sql_edit = " INSERT INTO PROFILE_QUEUE VALUES ('".$id."','P22','".$arp."','".$date_start_pp."','".$date_end_pp."','1') ";
+			$query_edt =  mysqli_query($con_maria,$sql_edit); 
+			
+		}
+		
+		$int_pr++;
 		
 	} 
 	// echo "\n End time ".date("Y-m-d h:i:s")." \n\n ";
