@@ -6,8 +6,8 @@
 		$con_mariafig = [
 		'host' => 'dev-db.u.1elf.net',
 		'port' => '8123',
-		'username' => 'inrate',
-		'password' => 'a2cd-0c6d851fc9de'
+		'username' => $config_db_clickhouse['username'],
+		'password' => $config_db_clickhouse['password']
 	];
 	$db = new ClickHouseDB\Client($con_mariafig);
 	$db->database('inrate');
@@ -238,37 +238,142 @@ IF(CAST(RC.SPLIT_MINUTES AS TIME) > CAST('00:00:00' AS TIME) AND CAST(RC.SPLIT_M
 		$db->write("ALTER TABLE PTV_CIM_RATING_RES DELETE WHERE `ID_PROFILE` = ".$id." AND formatDateTime(`DATE`,'%Y-%m') = '".$name_arps."' ");
 		
 		
+				 // $db->write("
+				 // INSERT INTO PTV_CIM_RATING_RES
+												
+											// SELECT * FROM (												
+												// SELECT  formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d') DATES,A.CHANNEL,A.PROGRAM,formatDateTime(toDateTime(A.MINUTES),'%T') FE,TIME,TIME AS SS,DURATION,`BRAND`,
+												// RATE,toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')), toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')) AS NETPRICE,
+												// ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,'UseeTV' AS PROVIDER,
+												// B.`VIEWERS`, ALL_VIEWS,UNIVERSE, (B.`VIEWERS`/ALL_VIEWS)*100 AS TVS,(B.`VIEWERS`/UNIVERSE)*100 AS TVR, ".$id.", (CNTS/UNIVERSE)*100 re  FROM
+												// (
+
+													// SELECT B.*,C.PROGRAM ,
+													// CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
+													// FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B 
+													// LEFT JOIN (SELECT IF(CHANNEL = 'ONE','S-ONE',IF(CHANNEL = 'SPOTV','SPO TV',CHANNEL)) AS CHANNEL_NAME,
+													// CHANNEL,PROGRAM,SPLIT_MINUTES FROM `EPG_SPLIT` WHERE SPLIT_MINUTES BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59'
+													// GROUP BY CHANNEL,PROGRAM,SPLIT_MINUTES) C ON B.CHANNEL = C.CHANNEL_NAME 
+													// AND CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) = toString(C.`SPLIT_MINUTES`)
+													// WHERE toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')) > 0
+													
+												// ) A LEFT JOIN 
+												// (
+													// SELECT ALL_VIEWS,VIEWERS,SPLIT_MINUTES,UNIVERSE,CHANNEL,PROGRAM FROM `SUMMARY_PER_MINUTES_RES_V2`
+													// WHERE PERIODE = '".$periode."'
+													// AND PROFILE_ID = '".$id."'
+												// ) B ON A.CHANNEL = B.CHANNEL AND A.MINUTES = toString(B.SPLIT_MINUTES)
+												// LEFT JOIN
+												// (
+													 // SELECT SUM(WEIGHT) CNTS,A.CHANNEL,MINUTES FROM (
+														// SELECT COUNT(RESPID) CNT,RESPID,A.CHANNEL_NAME AS CHANNEL,WEIGHT,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES FROM (
+															 // SELECT A.CHANNEL AS CHANNEL_NAME,A.* FROM `CDR_EPG_RES_ALL_STEP2_2022` A
+															 // JOIN `PROFILE_CARDNO_RES` F ON A.`RESPID` = F.CARDNO
+															 // WHERE (`BEGIN_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' OR
+															 // `END_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' )
+															 // AND `ID_PROFILE` = ".$id."
+														 // ) A JOIN (
+															// SELECT *,
+															// CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
+															// FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B
+														 // ) B ON  A.CHANNEL_NAME = B.CHANNEL
+														 // where toDateTime(B.MINUTES) BETWEEN BEGIN_PROGRAM AND END_PROGRAM
+														 // GROUP BY RESPID,A.CHANNEL_NAME,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES,WEIGHT  	
+													 // ) A WHERE CNT >= 1 GROUP BY CHANNEL,MINUTES  
+												// ) C  
+												// ON A.CHANNEL = C.CHANNEL AND A.MINUTES = toString(C.MINUTES)
+											// ) A 
+				 // ");
+				 
 				 $db->write("
-				 INSERT INTO PTV_CIM_RATING_RES
+										INSERT INTO PTV_CIM_RATING_RES
 												
 											SELECT * FROM (												
-												SELECT  formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d') DATES,A.CHANNEL,A.PROGRAM,formatDateTime(toDateTime(A.MINUTES),'%T') FE,TIME,TIME AS SS,DURATION,`BRAND`,
-												RATE,toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')), toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')) AS NETPRICE,
-												ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,'UseeTV' AS PROVIDER,
-												B.`VIEWERS`, ALL_VIEWS,UNIVERSE, (B.`VIEWERS`/ALL_VIEWS)*100 AS TVS,(B.`VIEWERS`/UNIVERSE)*100 AS TVR, ".$id.", (CNTS/UNIVERSE)*100 re  FROM
+												SELECT  formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d') DATES,A.CHANNEL CHANNEL,A.PROGRAM PROGRAM,A.MINUTES MINUTES,TIME,TIME AS SS,DURATION,`BRAND`,
+												RATE,RATECARD, RATECARD AS NETPRICE,ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,'UseeTV' AS PROVIDER,
+												B.`VIEWERS` VIEWERS, ALL_VIEWS,UNIVERSE, (B.`VIEWERS`/ALL_VIEWS)*100 AS TVS,(B.`VIEWERS`/UNIVERSE)*100 AS TVR, ".$id." IDS, (CNTS/UNIVERSE)*100 RE  FROM
 												(
 
 													SELECT B.*,C.PROGRAM ,
 													CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
 													FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B 
-													LEFT JOIN (SELECT IF(CHANNEL = 'ONE','S-ONE',IF(CHANNEL = 'SPOTV','SPO TV',CHANNEL)) AS CHANNEL_NAME,
-													CHANNEL,PROGRAM,SPLIT_MINUTES FROM `EPG_SPLIT` WHERE SPLIT_MINUTES BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59'
+													LEFT JOIN (SELECT CHANNEL AS CHANNEL_NAME,
+													CHANNEL,PROGRAM,SPLIT_MINUTES FROM `EPG_SPLIT` WHERE SPLIT_MINUTES BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' AND CHANNEL = 'ONE'
 													GROUP BY CHANNEL,PROGRAM,SPLIT_MINUTES) C ON B.CHANNEL = C.CHANNEL_NAME 
 													AND CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) = toString(C.`SPLIT_MINUTES`)
 													WHERE toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')) > 0
+													AND CHANNEL = 'ONE'
 													
 												) A LEFT JOIN 
 												(
-													SELECT ALL_VIEWS,VIEWERS,SPLIT_MINUTES,UNIVERSE,CHANNEL,PROGRAM FROM `SUMMARY_PER_MINUTES_RES_V2`
+													SELECT ALL_VIEWS,VIEWERS,SPLIT_MINUTES,UNIVERSE,'ONE' AS CHANNELSS,PROGRAM FROM `SUMMARY_PER_MINUTES_RES_V2`
 													WHERE PERIODE = '".$periode."'
 													AND PROFILE_ID = '".$id."'
-												) B ON A.CHANNEL = B.CHANNEL AND A.MINUTES = toString(B.SPLIT_MINUTES)
+													and CHANNEL = 'S-ONE'
+												) B ON A.CHANNEL = B.CHANNELSS AND A.MINUTES = toString(B.SPLIT_MINUTES) AND A.PROGRAM = B.PROGRAM
+												LEFT JOIN
+												(
+													 SELECT SUM(WEIGHT) CNTS,A.CHANNEL,MINUTES FROM (
+														SELECT COUNT(RESPID) CNT,RESPID,CHANNELS AS CHANNEL,WEIGHT,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES FROM (
+															 SELECT A.CHANNEL AS CHANNEL_NAME,A.*,'ONE' AS CHANNELS FROM `CDR_EPG_RES_ALL_STEP2_2022` A
+															 JOIN `PROFILE_CARDNO_RES` F ON A.`RESPID` = F.CARDNO
+															 WHERE (`BEGIN_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' OR
+															 `END_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' )
+															  AND `ID_PROFILE` = ".$id."
+															 and CHANNEL = 'S-ONE'
+														 ) A JOIN (
+															SELECT *,
+															CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
+															FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B
+															 WHERE CHANNEL = 'ONE'
+														 ) B ON  A.CHANNELS = B.CHANNEL
+														 where toDateTime(B.MINUTES) BETWEEN BEGIN_PROGRAM AND END_PROGRAM
+														 GROUP BY RESPID,A.CHANNELS,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES,WEIGHT  	
+													 ) A WHERE CNT >= 1 GROUP BY CHANNEL,MINUTES  
+												) C  
+												ON A.CHANNEL = C.CHANNEL AND A.MINUTES = toString(C.MINUTES)
+											) A 
+											
+											GROUP BY `DATES`,`CHANNEL`,`PROGRAM`,`MINUTES`,`TIME`,`SS`,DURATION,BRAND,RATE,RATECARD,NETPRICE,ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,
+										PROVIDER,VIEWERS,ALL_VIEWS,UNIVERSE,TVS,TVR,IDS,RE;
+				 ");
+				 
+				 $db->write("
+										INSERT INTO PTV_CIM_RATING_RES
+												
+											SELECT * FROM (												
+												SELECT  formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d') DATES,A.CHANNEL CHANNEL,A.PROGRAM PROGRAM,A.MINUTES MINUTES,TIME,TIME AS SS,DURATION,`BRAND`,
+												RATE,RATECARD, RATECARD AS NETPRICE,ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,'UseeTV' AS PROVIDER,
+												B.`VIEWERS` VIEWERS, ALL_VIEWS,UNIVERSE, (B.`VIEWERS`/ALL_VIEWS)*100 AS TVS,(B.`VIEWERS`/UNIVERSE)*100 AS TVR, '".$id."' IDS, (CNTS/UNIVERSE)*100 RE  FROM
+												(
+
+													SELECT B.*,C.PROGRAM ,
+													CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
+													FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B 
+													LEFT JOIN (
+														SELECT IF(CHANNEL = 'SPOTV','SPO TV',IF(CHANNEL = 'SPOTV 2','SPO TV 2',IF(CHANNEL = 'FUN PLANET','INDIKIDS',CHANNEL))) AS CHANNEL_NAME,CHANNEL_CDR,
+														CHANNEL,PROGRAM,SPLIT_MINUTES FROM `EPG_SPLIT` A 
+														JOIN CDR_EPG_PARAM B ON A.CHANNEL = B.CHANNEL_EPG WHERE SPLIT_MINUTES BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' AND CHANNEL <> 'ONE'
+														GROUP BY CHANNEL,PROGRAM,SPLIT_MINUTES,CHANNEL_CDR
+													) C ON B.CHANNEL = C.CHANNEL_CDR 
+													AND CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) = toString(C.`SPLIT_MINUTES`)
+													WHERE toInt32(REPLACE(REPLACE(RATECARD, '\n', ''), '\r', '')) > 0
+													and CHANNEL <> 'ONE'
+													
+												) A LEFT JOIN 
+												(
+													SELECT ALL_VIEWS,VIEWERS,SPLIT_MINUTES,UNIVERSE,CHANNEL,PROGRAM,IF(CHANNEL = 'SPOTV','SPO TV',
+													IF(CHANNEL = 'SPOTV 2','SPO TV 2',CHANNEL)) AS CHANNEL_NAME FROM `SUMMARY_PER_MINUTES_RES_V2`
+													WHERE PERIODE = '".$periode."'
+													AND PROFILE_ID = '".$id."'
+													and CHANNEL <> 'ONE'
+												) B ON A.CHANNEL = B.CHANNEL_NAME AND A.MINUTES = toString(B.SPLIT_MINUTES)
 												LEFT JOIN
 												(
 													 SELECT SUM(WEIGHT) CNTS,A.CHANNEL,MINUTES FROM (
 														SELECT COUNT(RESPID) CNT,RESPID,A.CHANNEL_NAME AS CHANNEL,WEIGHT,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES FROM (
-															 SELECT A.CHANNEL AS CHANNEL_NAME,A.* FROM `CDR_EPG_RES_ALL_STEP2_2022` A
-															 JOIN `PROFILE_CARDNO_RES` F ON A.`RESPID` = F.CARDNO
+															 SELECT IF(A.CHANNEL = 'SPOTV','SPO TV',IF(A.CHANNEL = 'SPOTV 2','SPO TV 2',A.CHANNEL)) AS CHANNEL_NAME ,A.* FROM `CDR_EPG_RES_ALL_STEP2_2022` A
+															  JOIN `PROFILE_CARDNO_RES` F ON A.`RESPID` = F.CARDNO
 															 WHERE (`BEGIN_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' OR
 															 `END_PROGRAM` BETWEEN '".$start_date_periode." 00:00:00' AND '".$end_date_periode." 23:59:59' )
 															 AND `ID_PROFILE` = ".$id."
@@ -276,6 +381,7 @@ IF(CAST(RC.SPLIT_MINUTES AS TIME) > CAST('00:00:00' AS TIME) AND CAST(RC.SPLIT_M
 															SELECT *,
 															CONCAT(formatDateTime(parseDateTimeBestEffortOrNull(DATE),'%Y-%m-%d'),' ',SUBSTRING(B.`TIME` ,1, 2),':',SUBSTRING(B.`TIME`, 4, 2),':00' ) AS MINUTES 
 															FROM `LOGPROOF_".$name_tbs3 ."_FULL_STEP2` B
+															WHERE CHANNEL <> 'ONE'
 														 ) B ON  A.CHANNEL_NAME = B.CHANNEL
 														 where toDateTime(B.MINUTES) BETWEEN BEGIN_PROGRAM AND END_PROGRAM
 														 GROUP BY RESPID,A.CHANNEL_NAME,BRAND,ADVERTISER,AGENCY,HOUSE_NUMBER,B.MINUTES,WEIGHT  	
@@ -283,6 +389,9 @@ IF(CAST(RC.SPLIT_MINUTES AS TIME) > CAST('00:00:00' AS TIME) AND CAST(RC.SPLIT_M
 												) C  
 												ON A.CHANNEL = C.CHANNEL AND A.MINUTES = toString(C.MINUTES)
 											) A 
+											
+											GROUP BY `DATES`,`CHANNEL`,`PROGRAM`,`MINUTES`,`TIME`,`SS`,DURATION,BRAND,RATE,RATECARD,NETPRICE,ADVERTISER,AGENCY,HOUSE_NUMBER,STATUS,
+										PROVIDER,VIEWERS,ALL_VIEWS,UNIVERSE,TVS,TVR,IDS,RE;
 				 ");
 				 
 				
