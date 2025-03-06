@@ -15,6 +15,9 @@ include '/var/www/dh/vendor/autoload.php';
 	$db->setConnectTimeOut(500); // 5 seconds
 
 	 $date = date('Y-m-d H:i:s');		
+	 $periode =date_format(date_create($date),"Y-F"); //2018-March
+	 $days =date_format(date_create($date),"Y-m-d"); //Daya
+	 $n_period =date_format(date_create($date),"Y-m"); //201811	
 	 $server_node = 'Web Service Server';
 
 	 $Active = "echo `cat /proc/meminfo | grep Active: | sed 's/Active: //g'`";
@@ -53,7 +56,25 @@ include '/var/www/dh/vendor/autoload.php';
 	 
 	 $db->write("INSERT INTO SERVER_PERF VALUES ('".$date."','".$server_node."','".$mem_Active."','".$mem_MemTotal."','".$mem_MemFree."','".$mem_MemAvailable."','".$arrs[0]."','".$StoreSize."','".$StoreUsed."','".$StoreAvail."','".$StoreUseP."') ");	
 	 
-	 echo $date.' '.$mem_Active.' '.$mem_MemTotal.' '.$mem_MemFree.' '.$mem_MemAvailable.' '.$arrs[0].' '.$StoreSize.' '.$StoreUsed.' '.$StoreAvail.' '.$StoreUseP;
+	 $db->write("ALTER TABLE SERVER_PERF_SUMMARY DELETE WHERE SERVER_NODE = '".$server_node."' AND PERIODE = 'MONTHLY' AND TIME_PERIODE = '".$periode."' ");	
+	 
+	 $db->write("ALTER TABLE SERVER_PERF_SUMMARY DELETE WHERE SERVER_NODE = '".$server_node."' AND PERIODE = 'DAILY' AND TIME_PERIODE = '".$days."' ");	
+	 
+	 $db->write("
+	 INSERT INTO SERVER_PERF_SUMMARY
+				SELECT SERVER_NODE,'DAILY' as periode,'".$days."' AS DS, MAX(MEM_ACTIVE) AS MAX_MEM_ACTIVE, AVG(MEM_ACTIVE) AS AVG_MEM_ACTIVE ,
+				MAX(CPU_USAGE) AS MAX_CPU_USAGE, AVG(CPU_USAGE) AS AVG_CPU_USAGE, '".$StoreSize."' as STORAGE,'".$StoreUsed."' as STORAGE1,'".$StoreAvail."' as STORAGE2,'".$StoreUseP."' as STORAGE3
+				FROM inrate.SERVER_PERF WHERE SERVER_NODE = '".$server_node."' AND formatDateTime(`DATETIME`,'%Y-%m-%d') = '".$days."'
+				GROUP BY  SERVER_NODE
+	");	
+	
+	$db->write("
+				INSERT INTO SERVER_PERF_SUMMARY
+				SELECT SERVER_NODE,'MONTHLY' as periode, '".$periode."' AS DS, MAX(MEM_ACTIVE) AS MAX_MEM_ACTIVE, AVG(MEM_ACTIVE) AS AVG_MEM_ACTIVE ,
+				MAX(CPU_USAGE) AS MAX_CPU_USAGE, AVG(CPU_USAGE) AS AVG_CPU_USAGE,'".$StoreSize."' as STORAGE,'".$StoreUsed."' as STORAGE1,'".$StoreAvail."' as STORAGE2,'".$StoreUseP."' as STORAGE3
+				FROM inrate.SERVER_PERF WHERE SERVER_NODE = '".$server_node."' AND formatDateTime(`DATETIME`,'%Y-%m') = '".$n_period."'
+				GROUP BY  SERVER_NODE
+	");
 
 ?>
 		
