@@ -13,24 +13,9 @@ include '/var/www/dh/vendor/autoload.php';
 	//$db->setTimeout(1.5);      // 1500 ms
 	$db->setTimeout(1000);       // 10 seconds
 	$db->setConnectTimeOut(500); // 5 seconds
-	//$con = mysqli_connect('master.u.1elf.net:3306','root','aJxTF5XsTDSQ');
-  //mysqli_select_db($con,'prod_unics');
 
-  //die;
-  
-  
-										
-										// $db->write("
-										
-										// INSERT INTO CDR_EPG_ALL_SESSION_HARIAN_WEEK_N
-										// SELECT * FROM `CDR_EPG_ALL_SESSION_HARIAN_".$array_dates."_N`
-										// WHERE (`USER_BEGIN_SESSION` BETWEEN '".$check_progress[0]["START_DATE"]." 00:00:00' AND '".$check_progress[0]["EMD_DATE"]." 23:59:59' OR
-										// `USER_END_SESSION` BETWEEN '".$check_progress[0]["START_DATE"]." 00:00:00' AND '".$check_progress[0]["EMD_DATE"]." 23:59:59' )
-										// GROUP BY `CARDNO`,`CHANNEL`,`USER_BEGIN_SESSION`,`USER_END_SESSION`,`PROGRAM`,`KATEGORI_CHANNEL`,`BEGIN_PROGRAM`,`END_PROGRAM`,`GENRE_PROGRAM`,`DURASI`,`DURASI_PROGRAM`,`DATE`
-										
-										// ");	
 	 $date = date('Y-m-d H:i:s');		
-	 $server_node = 'Main Server';
+	 $server_node = 'Web Service Server';
 
 	 $Active = "echo `cat /proc/meminfo | grep Active: | sed 's/Active: //g'`";
 	 $mem_Active = shell_exec($Active);
@@ -60,6 +45,9 @@ include '/var/www/dh/vendor/autoload.php';
 	 $mem_StoreAvailable = shell_exec($StoreAvailable);
 	 
 	 $arr_str =  explode(' ',$mem_StoreAvailable);
+	 
+	 print_r($arr_str);die;
+	 
 	 $StoreSize = $arr_str[34];
 	 $StoreUsed = $arr_str[36];
 	 $StoreAvail = $arr_str[38];
