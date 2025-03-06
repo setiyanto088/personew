@@ -1,8 +1,6 @@
 <?php 
 
 include '/var/www/dh/vendor/autoload.php';
-	
-	include 'database.php';   
 
 	$config = [
 		'host' => 'localhost',
