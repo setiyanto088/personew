@@ -3,7 +3,7 @@
 include '/var/www/dh/vendor/autoload.php';
 
 	$config = [
-		'host' => 'localhost',
+		'host' => 'dev-db.u.1elf.net',
 		'port' => '8123',
 		'username' => 'inrate',
 		'password' => 'a2cd-0c6d851fc9de'
