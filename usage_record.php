@@ -45,13 +45,11 @@ include '/var/www/dh/vendor/autoload.php';
 	 $mem_StoreAvailable = shell_exec($StoreAvailable);
 	 
 	 $arr_str =  explode(' ',$mem_StoreAvailable);
-	 
-	 print_r($arr_str);die;
-	 
-	 $StoreSize = $arr_str[34];
-	 $StoreUsed = $arr_str[36];
-	 $StoreAvail = $arr_str[38];
-	 $StoreUseP = $arr_str[40];
+	 	 
+	 $StoreSize = $arr_str[19];
+	 $StoreUsed = $arr_str[21];
+	 $StoreAvail = $arr_str[23];
+	 $StoreUseP = $arr_str[25];
 	 
 	 $db->write("INSERT INTO SERVER_PERF VALUES ('".$date."','".$server_node."','".$mem_Active."','".$mem_MemTotal."','".$mem_MemFree."','".$mem_MemAvailable."','".$arrs[0]."','".$StoreSize."','".$StoreUsed."','".$StoreAvail."','".$StoreUseP."') ");	
 	 
